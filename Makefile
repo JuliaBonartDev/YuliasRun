@@ -176,3 +176,9 @@ help: ## ❓ Mostrar todos los comandos disponibles
 	@echo ""
 	@echo "🎓 Para estudiantes: make student-setup
 	@echo "🔧 Para desarrollo: make dev-run"
+
+.PHONY: watch
+watch: ## 👀 Ejecutar el juego con nodemon (reinicio automático al guardar)
+	@echo "👀 Iniciando Julia's Run con nodemon..."
+	@echo "💡 Cada vez que guardes un archivo, el juego se reiniciará"
+	nodemon --exec $(PYTHON) $(SRC_DIR)/main.py

@@ -166,7 +166,7 @@ class Player:
         
         # === CARGA DE SPRITE PARA JULIA ===
         # Intentar cargar sprite de Julia
-        sprite_path = os.path.join("assets", "sprites", "julia_pixelart.jpg")
+        sprite_path = os.path.join(SPRITE_JULIA)
         self.sprite, self.using_fallback = load_sprite_with_fallback(
             sprite_path, 
             PLAYER_COLOR,  # Color fallback si no hay imagen

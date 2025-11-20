@@ -70,7 +70,7 @@ class JuliasRunGame:
         
         # Crear la ventana del juego
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("Julia's Run - ¡Esquiva y Sobrevive!")
+        pygame.display.set_caption("The mermaid Yulia's Run - ¡Esquiva para evitar convertirte en Hulka!")
         
         # Control de tiempo (FPS)
         self.clock = pygame.time.Clock()

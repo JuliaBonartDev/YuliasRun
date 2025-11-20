@@ -18,6 +18,8 @@ import pygame
 import random
 from settings import *
 
+pygame.mixer.init()
+
 class CooldownTimer:
     """
     Esta clase gestiona el tiempo de cooldown entre lanzamientos de cuchillos.
@@ -168,6 +170,7 @@ class PowerUpEffect:
         player.speed = int(self.original_speed * VODKA_SPEED_MULTIPLIER)
         
         # TODO 4: Añadir efecto sonoro
+        
         # pygame.mixer.Sound(SOUND_POWERUP).play()
         
         print("¡Vodka Boost activado! Velocidad aumentada.")  # Debug
@@ -186,7 +189,9 @@ class PowerUpEffect:
         player.has_shield = True
         
         # TODO 4: Añadir efecto sonoro
-        # pygame.mixer.Sound(SOUND_POWERUP).play()
+        
+        # pygame.mixer.Sound(SOUND_ESCUDO).play()
+
         
         print("¡Té Mágico activado! Escudo protector obtenido.")  # Debug
     
@@ -479,37 +484,36 @@ class ComboSystem:
                 screen.blit(mult_surface, mult_rect)
 
 
-# TODO 7: Clase para efectos de partículas
+# # TODO 7: Clase para efectos de partículas
 # class ParticleEffect:
-#     """Sistema de partículas para efectos visuales."""
-#     
+# #     """Sistema de partículas para efectos visuales."""
+# #     
 #     def __init__(self, x, y, color, particle_count=10):
 #         self.particles = []
 #         for _ in range(particle_count):
 #             # Crear partículas con velocidades aleatorias
-#             pass
-#     
+       
+    
 #     def update(self):
 #         # Actualizar posición de todas las partículas
-#         pass
-#     
+    
 #     def draw(self, screen):
 #         # Dibujar todas las partículas
-#         pass
 
-# TODO 8: Sistema de combos
+
+# # TODO 8: Sistema de combos
 # class ComboSystem:
-#     """Sistema para trackear combos de acciones consecutivas."""
-#     
+# #     """Sistema para trackear combos de acciones consecutivas."""
+    
 #     def __init__(self):
 #         self.combo_count = 0
 #         self.combo_timer = 0
 #         self.max_combo_time = 120  # 2 segundos
-#     
+    
 #     def add_hit(self):
 #         # Añadir golpe al combo
-#         pass
-#     
+
+    
 #     def reset_combo(self):
 #         # Resetear combo
 #         pass

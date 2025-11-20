@@ -33,8 +33,8 @@ import pygame
 
 # === CONFIGURACIÓN DE VENTANA ===
 # 🔍 Mejora sugerida: Estos valores podrían leerse de un archivo de configuración
-WINDOW_WIDTH = 800      # Ancho de la ventana en píxeles
-WINDOW_HEIGHT = 600     # Alto de la ventana en píxeles  
+WINDOW_WIDTH = 1000      # Ancho de la ventana en píxeles
+WINDOW_HEIGHT = 800     # Alto de la ventana en píxeles  
 FPS = 60               # Cuadros por segundo - ¡Prueba cambiar a 30 o 120!
 
 # === COLORES (formato RGB) ===
@@ -52,8 +52,8 @@ LIGHT_BLUE = (173, 216, 230) # Combinación personalizada
 PURPLE = (128, 0, 128)
 
 # === CONFIGURACIÓN DEL JUGADOR ===
-PLAYER_WIDTH = 40      # Ancho del sprite del jugador
-PLAYER_HEIGHT = 60     # Alto del sprite del jugador
+PLAYER_WIDTH = 80      # Ancho del sprite del jugador
+PLAYER_HEIGHT = 120     # Alto del sprite del jugador
 PLAYER_SPEED = 5       # Velocidad normal de movimiento (píxeles por frame)
 PLAYER_LIVES = 3       # Número de vidas iniciales
 PLAYER_COLOR = BLUE    # Color del rectángulo del jugador (placeholder)
@@ -122,8 +122,8 @@ STATE_PAUSED = "paused"  # ✅ IMPLEMENTADO: Estado de pausa
 
 # === CONFIGURACIÓN DE FUENTES ===
 FONT_SIZE_LARGE = 48   # Tamaño de fuente para títulos
-FONT_SIZE_MEDIUM = 24  # Tamaño de fuente para texto normal
-FONT_SIZE_SMALL = 16   # Tamaño de fuente para detalles
+FONT_SIZE_MEDIUM = 28  # Tamaño de fuente para texto normal
+FONT_SIZE_SMALL = 18   # Tamaño de fuente para detalles
 
 # ✅ IMPLEMENTADO: Configuración para barra de cooldown
 COOLDOWN_BAR_WIDTH = 100   # Ancho de la barra de cooldown en píxeles
@@ -148,12 +148,30 @@ SPRITE_ANIMATION_SPEED = 8         # Frames entre cambios de sprite
 POWERUP_PULSE_SPEED = 4           # Velocidad del efecto de pulso en power-ups
 
 # TODO 4: Añadir rutas de assets cuando estén disponibles
-# SPRITE_JULIA = "assets/sprites/julia.png"
+#Videos
+GAME_OVER_VIDEO = "assets/animaciones/video_game_over.mp4"
+VIDEO_MENU_IZQUIERDA = "assets/animaciones/video_menu.mp4"
+PAUSE_VIDEO = "assets/animaciones/video_pause.mp4"
+
+#Imagenes
+IMG_MENU_DERECHO = "assets/images/fondo-menu.png"
+IMG_MAIN = "assets/images/main_fondo.png"
+LOGO_MENU = "assets/images/logo.png"
+LOGO_GAME_OVER = "assets/images/logo_game_over.png"
+
+#Sprites
+SPRITE_JULIA = "assets/sprites/yulia_sprite.png"
 # SPRITE_KNIFE = "assets/sprites/knife.png"
 # SPRITE_POWERUP = "assets/sprites/powerup.png"
-# SOUND_THROW = "assets/sounds/throw.wav"
+
+#Musica
+MUSIC_MENU = "assets/music/heart_of_the_ocean.ogg"
+
+#Sonidos
+SOUND_THROW = "assets/sounds/sound_throw.wav"
 # SOUND_HIT = "assets/sounds/hit.wav"
-# SOUND_POWERUP = "assets/sounds/powerup.wav"
+SOUND_POWERUP = "assets/sounds/sound_powerup.wav"
+SOUND_ESCUDO = "assets/sounds/sound_escudo.wav"
 
 # === NOTAS EDUCATIVAS ===
 """

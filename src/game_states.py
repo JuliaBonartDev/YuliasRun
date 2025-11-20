@@ -20,6 +20,14 @@ Referencias útiles:
 
 import pygame
 from settings import *
+import cv2
+import os
+from settings import GAME_OVER_VIDEO
+from settings import VIDEO_MENU_IZQUIERDA
+from settings import IMG_MENU_DERECHO
+from settings import LOGO_MENU
+from settings import LOGO_GAME_OVER
+from settings import MUSIC_MENU
 
 class GameStateManager:
     """
@@ -75,13 +83,81 @@ class MenuState:
     """
     
     def __init__(self, state_manager):
-        """
-        Constructor del estado de menú.
-        
-        Args:
-            state_manager: Referencia al gestor de estados
-        """
+        """Constructor del estado de menú."""
+
         self.state_manager = state_manager
+
+        # ======================
+        # CARGAR VIDEO
+        # ======================
+        base_path = os.path.dirname(os.path.dirname(__file__))  
+        # Sube desde /estados/ hasta el directorio raíz
+
+        video_path = os.path.join(base_path, VIDEO_MENU_IZQUIERDA)
+        video_path = os.path.abspath(video_path)
+                
+        self.video = cv2.VideoCapture(video_path)
+        if not self.video.isOpened():
+            print("Error al cargar el video")
+
+        # ======================
+        # CARGAR IMAGEN DEL MENÚ
+        # ======================
+        image_base_path = os.path.dirname(os.path.dirname(__file__))
+
+        image_path = os.path.join(image_base_path, IMG_MENU_DERECHO)
+        image_path = os.path.abspath(image_path)
+
+        try:
+            # Cargar imagen original sin escalar (escalaremos después)
+            self.original_menu_image = pygame.image.load(image_path)
+            self.menu_image = self.original_menu_image  # Copia inicial
+        except pygame.error as e:
+            print(f"Error al cargar la imagen del menú: {e}")
+
+        # Imagen fallback si no se pudo cargar
+            self.original_menu_image = pygame.Surface((300, WINDOW_HEIGHT))
+            self.original_menu_image.fill(PURPLE)
+            self.menu_image = self.original_menu_image
+
+        # Estas variables se inicializan luego en draw_background_animation()
+        self.last_frame_time = 0
+        self.current_frame_surface = None
+        self.video_width = WINDOW_WIDTH // 2  # tamaño inicial de seguridad
+
+        # ======================
+        # CARGAR IMAGEN DEL TÍTULO
+        # ======================
+        title_image_base_path = os.path.dirname(os.path.dirname(__file__))
+
+        title_image_path = os.path.join(title_image_base_path, LOGO_MENU) 
+        title_image_path = os.path.abspath(title_image_path)
+
+        try:
+            self.title_image = pygame.image.load(title_image_path).convert_alpha()
+        except pygame.error as e:
+            print(f"Error al cargar la imagen del título: {e}")
+            self.title_image = None
+
+        self.title_image = pygame.image.load(title_image_path).convert_alpha()
+       
+        self.title_image = pygame.transform.scale(self.title_image, (210, 220))
+
+        # ======================
+        # CARGAR MÚSICA DEL MENÚ
+        # ======================
+        music_base_path = os.path.dirname(os.path.dirname(__file__))
+
+        music_path = os.path.join(music_base_path, MUSIC_MENU)
+        music_path = os.path.abspath(music_path)
+
+        try:
+            pygame.mixer.init()  # Inicializar motor de sonido
+            pygame.mixer.music.load(music_path)
+            pygame.mixer.music.set_volume(0.5)   # volumen entre 0 y 1
+            pygame.mixer.music.play(-1)          # -1 = loop infinito
+        except Exception as e:
+            print("Error al cargar música del menú:", e)
     
     def handle_events(self, events):
         """
@@ -93,6 +169,7 @@ class MenuState:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == KEY_SPACE or event.key == KEY_ENTER:
+                    pygame.mixer.music.stop()               
                     self.state_manager.change_state(STATE_PLAYING)
                 elif event.key == KEY_ESCAPE:
                     return False  # Señal para salir del juego
@@ -103,6 +180,69 @@ class MenuState:
         """Actualiza la lógica del menú (no hay mucho que hacer aquí)."""
         pass
     
+    def draw_background_animation(self, screen):
+        """Dibuja el video de fondo y la imagen a la derecha."""
+
+        # Inicialización
+        if not hasattr(self, "last_frame_time"):
+            self.last_frame_time = 0
+            self.current_frame_surface = pygame.Surface((WINDOW_WIDTH // 2, WINDOW_HEIGHT))
+            self.current_frame_surface.fill(BLACK)
+            self.video_width = WINDOW_WIDTH // 2  # Valor por defecto
+
+        frame_delay = 120  # ms por frame (~8 FPS)
+        current_time = pygame.time.get_ticks()
+
+        # ¿Es hora de actualizar frame?
+        if current_time - self.last_frame_time >= frame_delay:
+            self.last_frame_time = current_time
+
+            ret, frame = self.video.read()
+
+            # Reiniciar si terminó
+            if not ret or frame is None:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret, frame = self.video.read()
+
+            if ret and frame is not None:
+                try:
+                    # BGR → RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                    # Redimensionar manteniendo proporción
+                    h, w, _ = frame.shape
+                    target_height = WINDOW_HEIGHT
+                    aspect_ratio = w / h
+                    target_width = int(target_height * aspect_ratio)
+
+                    frame = cv2.resize(frame, (target_width, target_height))
+
+                    # Convertir a Surface de pygame
+                    self.current_frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+                    self.video_width = target_width
+
+                except Exception as e:
+                    print("Error procesando frame:", e)
+                    self.current_frame_surface.fill(BLUE)
+                    self.video_width = WINDOW_WIDTH // 2
+
+        # Dibujar video (izquierda)
+        screen.blit(self.current_frame_surface, (0, 0))
+
+        # --- REDIMENSIONAR LA IMAGEN CORRECTAMENTE ---
+        right_panel_width = max(1, WINDOW_WIDTH - self.video_width)
+
+        # Usar SIEMPRE la imagen original
+        menu_img_scaled = pygame.transform.scale(
+            self.original_menu_image,
+            (right_panel_width, WINDOW_HEIGHT)
+        )
+
+        # Dibujar imagen a la derecha del video
+        screen.blit(menu_img_scaled, (self.video_width, 0))
+
+        
+
     def draw(self, screen):
         """
         Dibuja el menú principal.
@@ -110,25 +250,31 @@ class MenuState:
         Args:
             screen: Superficie de pygame donde dibujar
         """
+        self.draw_background_animation(screen)
+
+        OFFSET_X = 300
         
-        # Limpiar pantalla con color de fondo
-        screen.fill(LIGHT_BLUE)
         
         # Título del juego
-        title_text = self.state_manager.font_large.render("Julia's Run", True, BLACK)
-        title_rect = title_text.get_rect(center=(WINDOW_WIDTH//2, 150))
-        screen.blit(title_text, title_rect)
-        
-        # Subtítulo
-        subtitle_text = self.state_manager.font_medium.render("🏃‍♀️🔪 Aventura Épica", True, PURPLE)
-        subtitle_rect = subtitle_text.get_rect(center=(WINDOW_WIDTH//2, 200))
-        screen.blit(subtitle_text, subtitle_rect)
+        if self.title_image:
+            title_rect = self.title_image.get_rect(center=(WINDOW_WIDTH//2 + OFFSET_X, 150))
+            screen.blit(self.title_image, title_rect)
+        else:
+        # fallback por si la imagen falla
+            title_text = self.state_manager.font_large.render("The Little Mermaid Yulia's Run", True, WHITE)
+            title_rect = title_text.get_rect(center=(WINDOW_WIDTH//2 + OFFSET_X, 150))
+            screen.blit(title_text, title_rect)
+
+        # # Subtítulo
+        # subtitle_text = self.state_manager.font_medium.render("🧜‍♀️🐚 Aventura Épica", True, RED)
+        # subtitle_rect = subtitle_text.get_rect(center=(WINDOW_WIDTH//2 + OFFSET_X, 200))
+        # screen.blit(subtitle_text, subtitle_rect)
         
         # Instrucciones
         instructions = [
             "Controles:",
             "Flechas → Mover",
-            "Espacio → Lanzar cuchillo",
+            "Espacio → Lanzar estrella-shuriken",
             "Esquiva obstáculos rojos",
             "Recoge power-ups de colores",
             "",
@@ -138,9 +284,9 @@ class MenuState:
         
         start_y = 280
         for i, instruction in enumerate(instructions):
-            color = BLACK if instruction != "" else WHITE
-            text = self.state_manager.font_small.render(instruction, True, color)
-            text_rect = text.get_rect(center=(WINDOW_WIDTH//2, start_y + i * 25))
+            color = WHITE if instruction != "" else BLACK
+            text = self.state_manager.font_medium.render(instruction, True, color)
+            text_rect = text.get_rect(center=(WINDOW_WIDTH//2 + OFFSET_X, start_y + i * 25))
             screen.blit(text, text_rect)
         
         # TODO 9: Añadir demo visual o animación de fondo
@@ -161,7 +307,31 @@ class PlayingState:
     def __init__(self, state_manager):
         """Constructor del estado de juego."""
         self.state_manager = state_manager
-    
+
+        #Sonidos
+        self.snd_powerup = pygame.mixer.Sound(SOUND_POWERUP)
+        self.snd_escudo = pygame.mixer.Sound(SOUND_ESCUDO)
+        self.snd_throw = pygame.mixer.Sound(SOUND_THROW)
+
+        self.snd_powerup.set_volume(1.0)
+        self.snd_escudo.set_volume(1.0)
+        self.snd_throw.set_volume(1.0)
+
+        # --- Fondo del juego ---
+        base_path = os.path.dirname(os.path.dirname(__file__))
+        bg_path = os.path.join(base_path, IMG_MAIN)  
+        bg_path = os.path.abspath(bg_path)
+
+        self.background_image = pygame.image.load(bg_path).convert()
+        # self.background_image = pygame.image.load(bg_path).convert_alpha()
+        self.background_image = pygame.transform.scale(
+            self.background_image,
+            (WINDOW_WIDTH, WINDOW_HEIGHT)
+        )
+
+        print(os.path.exists(bg_path))
+       
+            
     def handle_events(self, events, player, knife_cooldown):
         """
         Maneja los eventos durante el juego.
@@ -293,8 +463,8 @@ class PlayingState:
             knife_cooldown: Timer de cooldown
         """
         
-        # Limpiar pantalla
-        screen.fill(BLACK)
+        screen.blit(self.background_image, (0, 0))
+
         
         # Dibujar todas las entidades
         player.draw(screen)
@@ -340,6 +510,7 @@ class PlayingState:
         
         # ✅ IMPLEMENTADO: Efectos activos
         effects.draw_active_effects(screen, self.state_manager.font_small)
+        
 
 
 class GameOverState:
@@ -352,10 +523,34 @@ class GameOverState:
     
     def __init__(self, state_manager):
         """Constructor del estado de Game Over."""
+        base_path = os.path.dirname(os.path.dirname(__file__))  
+        
+        video_path = os.path.join(base_path, GAME_OVER_VIDEO)
+        video_path = os.path.abspath(video_path)
+
+        self.video = cv2.VideoCapture(video_path)
+        if not self.video.isOpened():
+            print("Error al cargar el video de Game Over")
+
+        # Variables internas para controlar el video
+        self.last_frame_time = 0
+        self.current_frame_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.current_frame_surface.fill(BLACK)
+
         self.state_manager = state_manager
         self.final_score = 0
         self.best_score = 0
         self.is_new_record = False
+
+        # --- Imagen logo ---
+        logo_path = os.path.join(base_path, LOGO_GAME_OVER)
+        logo_path = os.path.abspath(logo_path)
+      
+        self.logo_image = pygame.image.load(logo_path).convert_alpha()
+        
+        self.logo_image = pygame.transform.scale(self.logo_image, (300, 300))
+
+        self.state_manager = state_manager
     
     def set_scores(self, final_score, best_score):
         """
@@ -389,6 +584,41 @@ class GameOverState:
     def update(self):
         """Actualiza la lógica del Game Over."""
         pass
+
+    def draw_background_animation(self, screen):
+        """Dibuja el video de fondo en loop."""
+
+        frame_delay = 100  # ms por frame (~10 FPS, ajustable)
+        current_time = pygame.time.get_ticks()
+
+        if current_time - self.last_frame_time >= frame_delay:
+            self.last_frame_time = current_time
+
+            ret, frame = self.video.read()
+
+            # Reiniciar si el video terminó
+            if not ret or frame is None:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret, frame = self.video.read()
+
+            if ret and frame is not None:
+                try:
+                    # BGR → RGB
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                    # Escalar al tamaño completo de la ventana
+                    frame = cv2.resize(frame, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+                    # Convertir a Surface
+                    self.current_frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+
+                except Exception as e:
+                    print("Error procesando frame del video Game Over:", e)
+                    self.current_frame_surface.fill(BLACK)
+
+        # Dibujar video
+        screen.blit(self.current_frame_surface, (0, 0))
+
     
     def draw(self, screen):
         """
@@ -397,36 +627,38 @@ class GameOverState:
         Args:
             screen: Superficie donde dibujar
         """
-        
-        # Fondo semi-transparente
-        screen.fill(BLACK)
+                
+        # Primero dibujar video animado
+        self.draw_background_animation(screen)
+
+        offset_x = 320   
+        offset_y = 100 
         
         # Título
-        game_over_text = self.state_manager.font_large.render("GAME OVER", True, RED)
-        title_rect = game_over_text.get_rect(center=(WINDOW_WIDTH//2, 150))
-        screen.blit(game_over_text, title_rect)
+        logo_rect = self.logo_image.get_rect(center=(WINDOW_WIDTH // 2 + offset_x, 150 + offset_y))
+        screen.blit(self.logo_image, logo_rect)
         
         # Puntuación final
-        score_text = self.state_manager.font_medium.render(f"Tu puntuación: {self.final_score}", True, WHITE)
-        score_rect = score_text.get_rect(center=(WINDOW_WIDTH//2, 220))
+        score_text = self.state_manager.font_large.render(f"Tu puntuación: {self.final_score}", True, WHITE)
+        score_rect = score_text.get_rect(center=(WINDOW_WIDTH//2 + offset_x, 320 + offset_y))
         screen.blit(score_text, score_rect)
         
         # Récord
         if self.is_new_record:
-            record_text = self.state_manager.font_medium.render("¡NUEVO RÉCORD!", True, YELLOW)
+            record_text = self.state_manager.font_large.render("¡NUEVO RÉCORD!", True, YELLOW)
         else:
-            record_text = self.state_manager.font_medium.render(f"Récord: {self.best_score}", True, GRAY)
+            record_text = self.state_manager.font_large.render(f"Récord: {self.best_score}", True, YELLOW)
         
-        record_rect = record_text.get_rect(center=(WINDOW_WIDTH//2, 260))
+        record_rect = record_text.get_rect(center=(WINDOW_WIDTH//2 + offset_x, 360 + offset_y))
         screen.blit(record_text, record_rect)
         
         # Instrucciones
-        restart_text = self.state_manager.font_small.render("Presiona ENTER para jugar de nuevo", True, WHITE)
-        restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH//2, 350))
+        restart_text = self.state_manager.font_medium.render("Presiona ENTER para jugar de nuevo", True, WHITE)
+        restart_rect = restart_text.get_rect(center=(WINDOW_WIDTH//2 + offset_x, 450 + offset_y))
         screen.blit(restart_text, restart_rect)
         
-        exit_text = self.state_manager.font_small.render("ESC para salir", True, WHITE)
-        exit_rect = exit_text.get_rect(center=(WINDOW_WIDTH//2, 380))
+        exit_text = self.state_manager.font_medium.render("ESC para salir", True, WHITE)
+        exit_rect = exit_text.get_rect(center=(WINDOW_WIDTH//2 + offset_x, 480 + offset_y))
         screen.blit(exit_text, exit_rect)
 
 
@@ -440,11 +672,23 @@ class PausedState:
     """
     
     def __init__(self, state_manager):
-        """Constructor del estado de pausa."""
         self.state_manager = state_manager
-        
-        # ✅ IMPLEMENTADO: Efecto visual de pausa
-        self.pulse_timer = 0  # Para efecto de pulso en el texto "PAUSED"
+        self.pulse_timer = 0
+
+        # --- VIDEO DE FONDO ---
+        base_path = os.path.dirname(os.path.dirname(__file__))
+        video_path = os.path.join(base_path, PAUSE_VIDEO)
+        video_path = os.path.abspath(video_path)
+
+        self.video = cv2.VideoCapture(video_path)
+
+        if not self.video.isOpened():
+            print("ERROR: No se pudo cargar el video de pausa")
+
+        self.last_frame_time = 0
+        self.current_frame_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.current_frame_surface.fill((0, 0, 0))
+
     
     def handle_events(self, events):
         """
@@ -468,6 +712,30 @@ class PausedState:
     def update(self):
         """Actualizar efectos visuales de la pausa."""
         self.pulse_timer += 1
+
+    def draw_background_video(self, screen):
+        frame_delay = 100  # 10 FPS
+        current_time = pygame.time.get_ticks()
+
+        if current_time - self.last_frame_time >= frame_delay:
+            self.last_frame_time = current_time
+
+            ret, frame = self.video.read()
+
+            if not ret or frame is None:
+                self.video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                ret, frame = self.video.read()
+
+            if ret and frame is not None:
+                try:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frame = cv2.resize(frame, (WINDOW_WIDTH, WINDOW_HEIGHT))
+                    self.current_frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
+                except:
+                    self.current_frame_surface.fill((0, 0, 0))
+
+        screen.blit(self.current_frame_surface, (0, 0))
+
     
     def draw(self, screen, game_surface=None):
         """
@@ -477,21 +745,16 @@ class PausedState:
             screen: Superficie donde dibujar
             game_surface: Superficie del juego de fondo (opcional)
         """
-        
-        # ✅ IMPLEMENTADO: Mostrar el juego de fondo con overlay de pausa
-        if game_surface:
-            # Dibujar el juego de fondo ligeramente oscurecido
-            dark_surface = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
-            dark_surface.fill((0, 0, 0))
-            dark_surface.set_alpha(128)  # Semi-transparente
-            
-            screen.blit(game_surface, (0, 0))
-            screen.blit(dark_surface, (0, 0))
-        else:
-            # Si no hay superficie de fondo, usar color sólido
-            screen.fill((50, 50, 50))  # Gris oscuro
-        
-        # ✅ IMPLEMENTADO: Texto "PAUSED" con efecto de pulso
+        self.draw_background_video(screen)
+
+        # Aplicar oscurecimiento para que el texto sea legible
+        # overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        # overlay.fill((0, 0, 0))
+        # overlay.set_alpha(120)
+        # screen.blit(overlay, (0, 0))
+
+              
+        self.pulse_timer += 1
         pulse_factor = abs(pygame.math.Vector2(1, 0).rotate(self.pulse_timer * 3).x)
         pulse_size = int(FONT_SIZE_LARGE + pulse_factor * 10)
         
@@ -501,7 +764,7 @@ class PausedState:
             pulse_font = self.state_manager.font_large
         
         paused_text = pulse_font.render("PAUSED", True, YELLOW)
-        paused_rect = paused_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 - 50))
+        paused_rect = paused_text.get_rect(center=(WINDOW_WIDTH//2, WINDOW_HEIGHT//2 + 200))
         
         # Sombra del texto para mejor legibilidad
         shadow_text = pulse_font.render("PAUSED", True, BLACK)
@@ -515,7 +778,7 @@ class PausedState:
             "ESC para volver al menú"
         ]
         
-        y_offset = WINDOW_HEIGHT//2 + 20
+        y_offset = WINDOW_HEIGHT//2 + 300
         for instruction in instructions:
             text = self.state_manager.font_medium.render(instruction, True, WHITE)
             text_rect = text.get_rect(center=(WINDOW_WIDTH//2, y_offset))
@@ -530,26 +793,6 @@ class PausedState:
             y_offset += 40
 
 
-# TODO 1: Estado de pausa
-# class PausedState:
-#     """Estado cuando el juego está pausado."""
-#     
-#     def __init__(self, state_manager):
-#         self.state_manager = state_manager
-#     
-#     def handle_events(self, events):
-#         for event in events:
-#             if event.type == pygame.KEYDOWN:
-#                 if event.key == KEY_P:
-#                     self.state_manager.change_state(STATE_PLAYING)
-#         return True
-#     
-#     def update(self):
-#         pass
-#     
-#     def draw(self, screen):
-#         # Dibujar "PAUSED" en el centro
-#         pass
 
 # === NOTAS EDUCATIVAS ===
 """
