@@ -328,9 +328,7 @@ class PlayingState:
             self.background_image,
             (WINDOW_WIDTH, WINDOW_HEIGHT)
         )
-
-        print(os.path.exists(bg_path))
-       
+              
             
     def handle_events(self, events, player, knife_cooldown):
         """

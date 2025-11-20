@@ -500,9 +500,8 @@ class JuliasRunGame:
         Esta función centraliza el dibujo del juego para poder reutilizarla
         en diferentes contextos (juego normal, pausa con fondo, etc.).
         """
-        
-        # Limpiar pantalla
-        surface.fill(BLACK)
+                
+        surface.blit(self.playing_state.background_image, (0, 0))
         
         # Dibujar todas las entidades
         self.player.draw(surface)
