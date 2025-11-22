@@ -168,6 +168,7 @@ SPRITE_CRAB = "assets/sprites/crab_sprite.png"
 
 #Musica
 MUSIC_MENU = "assets/music/heart_of_the_ocean.ogg"
+MUSIC_MAIN = "assets/music/part-of-that-world.ogg"
 
 #Sonidos
 SOUND_THROW = "assets/sounds/sound_throw.wav"

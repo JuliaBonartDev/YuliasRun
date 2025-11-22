@@ -75,12 +75,29 @@ class JuliasRunGame:
         # Control de tiempo (FPS)
         self.clock = pygame.time.Clock()
         
-        # Gestor de estados del juego
-        self.state_manager = GameStateManager()
-        self.menu_state = MenuState(self.state_manager)
-        self.playing_state = PlayingState(self.state_manager)
-        self.game_over_state = GameOverState(self.state_manager)
-        self.paused_state = PausedState(self.state_manager)  # ✅ IMPLEMENTADO
+        # =============== GESTOR DE ESTADOS DEL JUEGO ===============
+        # Primero creamos los estados con state_manager = None
+        self.state_manager = None  # Lo asignaremos después
+
+        self.menu_state = MenuState(None)
+        self.playing_state = PlayingState(None)
+        self.paused_state = PausedState(None)
+        self.game_over_state = GameOverState(None)
+
+        # Ahora creamos el GameStateManager pasando todos los estados
+        self.state_manager = GameStateManager({
+            STATE_MENU: self.menu_state,
+            STATE_PLAYING: self.playing_state,
+            STATE_PAUSED: self.paused_state,
+            STATE_GAME_OVER: self.game_over_state
+        })
+
+        # Finalmente, asignamos el state_manager real a los estados
+        self.menu_state.state_manager = self.state_manager
+        self.playing_state.state_manager = self.state_manager
+        self.paused_state.state_manager = self.state_manager
+        self.game_over_state.state_manager = self.state_manager
+
         
         # Variables del juego
         self.running = True
@@ -245,6 +262,7 @@ class JuliasRunGame:
             
             # Comprobar Game Over
             if not player_alive:
+                pygame.mixer.music.stop()
                 self.handle_game_over()
         
         elif current_state == STATE_PAUSED:

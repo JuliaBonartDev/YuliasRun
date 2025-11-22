@@ -31,47 +31,57 @@ from settings import MUSIC_MENU
 
 class GameStateManager:
     """
-    Esta clase gestiona los diferentes estados del juego.
-    
-    Un juego típicamente tiene varios estados o pantallas:
-    - Menú principal
-    - Gameplay
-    - Game Over
-    - Pausa
-    
-    Esta clase se encarga de cambiar entre estos estados y
-    asegurarse de que solo uno esté activo a la vez.
+    Gestiona los diferentes estados del juego (menú, jugando, pausa, etc.)
+    y llama a los métodos on_enter y on_exit de cada estado.
     """
-    
-    def __init__(self):
-        """Constructor del gestor de estados."""
-        self.current_state = STATE_MENU
-        self.next_state = None
-        
-        # Inicializar fuentes para texto
+
+    def __init__(self, states_dict):
+        """
+        Args:
+            states_dict: Diccionario con los estados del juego:
+                {
+                    STATE_MENU: MenuState(),
+                    STATE_PLAYING: PlayingState(),
+                    STATE_PAUSED: PausedState(),
+                    STATE_GAME_OVER: GameOverState(),
+                }
+        """
+        self.states = states_dict
+        self.current_state = None
+        self.next_state = STATE_MENU  # arrancar en menú
+
+        # Inicializar fuentes
         pygame.font.init()
         self.font_large = pygame.font.Font(None, FONT_SIZE_LARGE)
         self.font_medium = pygame.font.Font(None, FONT_SIZE_MEDIUM)
         self.font_small = pygame.font.Font(None, FONT_SIZE_SMALL)
-    
+
     def change_state(self, new_state):
-        """
-        Cambia a un nuevo estado.
-        
-        Args:
-            new_state: El nuevo estado (ver constantes en settings.py)
-        """
         self.next_state = new_state
-    
+
     def update_state(self):
-        """Actualiza el estado actual si hay un cambio pendiente."""
-        if self.next_state:
-            self.current_state = self.next_state
-            self.next_state = None
-    
+        """Si hay un cambio pendiente, ejecuta on_exit y on_enter."""
+        if self.next_state is None:
+            return
+        
+        new_state = self.next_state
+        self.next_state = None
+
+        # 1. Salida del estado anterior
+        if self.current_state:
+            state_obj = self.states[self.current_state]
+            if hasattr(state_obj, "on_exit"):
+                state_obj.on_exit()
+
+        # 2. Entrar en el nuevo estado
+        self.current_state = new_state
+        state_obj = self.states[self.current_state]
+        if hasattr(state_obj, "on_enter"):
+            state_obj.on_enter()
+
     def get_current_state(self):
-        """Obtiene el estado actual."""
         return self.current_state
+
 
 
 class MenuState:
@@ -143,21 +153,34 @@ class MenuState:
        
         self.title_image = pygame.transform.scale(self.title_image, (210, 220))
 
-        # ======================
-        # CARGAR MÚSICA DEL MENÚ
-        # ======================
+    def on_enter(self):
         music_base_path = os.path.dirname(os.path.dirname(__file__))
-
         music_path = os.path.join(music_base_path, MUSIC_MENU)
         music_path = os.path.abspath(music_path)
 
         try:
-            pygame.mixer.init()  # Inicializar motor de sonido
             pygame.mixer.music.load(music_path)
-            pygame.mixer.music.set_volume(0.5)   # volumen entre 0 y 1
-            pygame.mixer.music.play(-1)          # -1 = loop infinito
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)
         except Exception as e:
-            print("Error al cargar música del menú:", e)
+            print("Error al reproducir música de menú:", e)
+
+
+        # # ======================
+        # # CARGAR MÚSICA DEL MENÚ
+        # # ======================
+        # music_base_path = os.path.dirname(os.path.dirname(__file__))
+
+        # music_path = os.path.join(music_base_path, MUSIC_MENU)
+        # music_path = os.path.abspath(music_path)
+
+        # try:
+        #     pygame.mixer.init()  # Inicializar motor de sonido
+        #     pygame.mixer.music.load(music_path)
+        #     pygame.mixer.music.set_volume(0.5)   # volumen entre 0 y 1
+        #     pygame.mixer.music.play(-1)          # -1 = loop infinito
+        # except Exception as e:
+        #     print("Error al cargar música del menú:", e)
     
     def handle_events(self, events):
         """
@@ -306,7 +329,16 @@ class PlayingState:
     
     def __init__(self, state_manager):
         """Constructor del estado de juego."""
-        self.state_manager = state_manager
+        self.state_manager = state_manager    
+
+        # # Música de fondo
+        # base_path = os.path.dirname(os.path.dirname(__file__))
+        # music_path = os.path.join(base_path, MUSIC_MAIN)
+        # music_path = os.path.abspath(music_path)
+
+        # pygame.mixer.music.load(music_path)
+        # pygame.mixer.music.set_volume(0.5)   # volumen entre 0.0 y 1.0
+        # pygame.mixer.music.play(-1)          # -1 = loop infinito
 
         #Sonidos
         self.snd_powerup = pygame.mixer.Sound(SOUND_POWERUP)
@@ -331,7 +363,16 @@ class PlayingState:
 
         self.bg_y = 0   # posición vertical del fondo
         self.bg_speed = 2  # píxeles por frame (ajusta a tu gusto)
-              
+        
+    def on_enter(self):
+        base_path = os.path.dirname(os.path.dirname(__file__))
+        music_path = os.path.join(base_path, MUSIC_MAIN)
+        music_path = os.path.abspath(music_path)
+
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+          
             
     def handle_events(self, events, player, knife_cooldown):
         """
@@ -363,6 +404,7 @@ class PlayingState:
                 
                 elif event.key == KEY_P:
                     # ✅ IMPLEMENTADO: Implementar pausa
+                    pygame.mixer.music.pause() 
                     self.state_manager.change_state(STATE_PAUSED)
                     print("Juego pausado")  # Debug
                 
@@ -708,6 +750,7 @@ class PausedState:
             if event.type == pygame.KEYDOWN:
                 if event.key == KEY_P:
                     # Reanudar el juego
+                    pygame.mixer.music.unpause()
                     self.state_manager.change_state(STATE_PLAYING)
                     print("Juego reanudado")  # Debug
                 elif event.key == KEY_ESCAPE:
