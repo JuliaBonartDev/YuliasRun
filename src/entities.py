@@ -415,6 +415,7 @@ class Obstacle:
         
         # ⚙️ CONFIGURACIÓN SEGÚN TIPO - Cada tipo tiene características únicas
         if self.obstacle_type == 'fast':
+            sprite_path = SPRITE_URCHIN
             self.speed = int(OBSTACLE_SPEED * 1.5 * difficulty_multiplier)
             self.color = RED
             # Los rápidos son más pequeños (más difíciles de esquivar)
@@ -422,6 +423,7 @@ class Obstacle:
             self.rect.height = OBSTACLE_HEIGHT - 5
             
         elif self.obstacle_type == 'big':
+            sprite_path = SPRITE_JELLYFISH
             self.speed = int(OBSTACLE_SPEED * 0.7 * difficulty_multiplier)
             # Los grandes son más lentos pero más difíciles de esquivar
             self.rect.width = OBSTACLE_WIDTH + 15
@@ -429,16 +431,17 @@ class Obstacle:
             self.color = (150, 0, 0)  # Rojo más oscuro
             
         else:  # 'normal'
+            sprite_path = SPRITE_CRAB
             self.speed = int(OBSTACLE_SPEED * difficulty_multiplier)
             self.color = OBSTACLE_COLOR
         
-        # === CARGA DE SPRITE PARA CACHOPO (OBSTÁCULO) ===
-        # Intentar cargar sprite del cachopo
-        sprite_path = os.path.join("assets", "sprites", "cachopo_pixelart.jpg")
+        # === CARGA DE SPRITE OBSTÁCULO ===
+        
+        # Cargar sprite o fallback
         self.sprite, self.using_fallback = load_sprite_with_fallback(
-            sprite_path, 
-            self.color,  # Color fallback específico del tipo
-            self.rect.width, 
+            sprite_path,
+            self.color,          # Fallback de color
+            self.rect.width,
             self.rect.height
         )
         
@@ -863,7 +866,7 @@ class Explosion:
     dibujan durante un tiempo limitado y luego desaparecen.
     """
     
-    def __init__(self, x, y, color=YELLOW):
+    def __init__(self, x, y, color=BLUE):
         """
         Constructor de la explosión.
         

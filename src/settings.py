@@ -70,8 +70,8 @@ KNIFE_COLOR = YELLOW   # Color del cuchillo
 KNIFE_COOLDOWN = 30    # Tiempo de cooldown en frames (0.5 segundos a 60 FPS)
 
 # === CONFIGURACIÓN DE OBSTÁCULOS ===
-OBSTACLE_WIDTH = 30    # Ancho del obstáculo
-OBSTACLE_HEIGHT = 30   # Alto del obstáculo
+OBSTACLE_WIDTH = 50    # Ancho del obstáculo
+OBSTACLE_HEIGHT = 50   # Alto del obstáculo
 OBSTACLE_SPEED = 3     # Velocidad de caída (píxeles por frame)
 OBSTACLE_COLOR = RED   # Color del obstáculo
 OBSTACLE_SPAWN_RATE = 60  # Frames entre spawn de obstáculos (1 segundo a 60 FPS)
@@ -147,7 +147,6 @@ SCREEN_SHAKE_DURATION = 10         # Duración del screen shake en frames
 SPRITE_ANIMATION_SPEED = 8         # Frames entre cambios de sprite
 POWERUP_PULSE_SPEED = 4           # Velocidad del efecto de pulso en power-ups
 
-# TODO 4: Añadir rutas de assets cuando estén disponibles
 #Videos
 GAME_OVER_VIDEO = "assets/animaciones/video_game_over.mp4"
 VIDEO_MENU_IZQUIERDA = "assets/animaciones/video_menu.mp4"
@@ -162,6 +161,9 @@ LOGO_GAME_OVER = "assets/images/logo_game_over.png"
 #Sprites
 SPRITE_JULIA = "assets/sprites/yulia_sprite.png"
 SPRITE_KNIFE = "assets/sprites/starfish_sprite.png"
+SPRITE_JELLYFISH = "assets/sprites/jellyfish_sprite2.png"
+SPRITE_URCHIN = "assets/sprites/urchin_sprite.png"
+SPRITE_CRAB = "assets/sprites/crab_sprite.png"
 # SPRITE_POWERUP = "assets/sprites/powerup.png"
 
 #Musica
