@@ -63,8 +63,8 @@ PLAYER_START_X = WINDOW_WIDTH // 2 - PLAYER_WIDTH // 2
 PLAYER_START_Y = WINDOW_HEIGHT - PLAYER_HEIGHT - 20
 
 # === CONFIGURACIÓN DE CUCHILLOS ===
-KNIFE_WIDTH = 8        # Ancho del cuchillo
-KNIFE_HEIGHT = 20      # Alto del cuchillo
+KNIFE_WIDTH = 40        # Ancho del cuchillo
+KNIFE_HEIGHT = 40      # Alto del cuchillo
 KNIFE_SPEED = 10       # Velocidad del cuchillo (píxeles por frame)
 KNIFE_COLOR = YELLOW   # Color del cuchillo
 KNIFE_COOLDOWN = 30    # Tiempo de cooldown en frames (0.5 segundos a 60 FPS)
@@ -155,13 +155,13 @@ PAUSE_VIDEO = "assets/animaciones/video_pause.mp4"
 
 #Imagenes
 IMG_MENU_DERECHO = "assets/images/fondo-menu.png"
-IMG_MAIN = "assets/images/main_fondo.png"
+IMG_MAIN = "assets/images/main_yuls_2.png"
 LOGO_MENU = "assets/images/logo.png"
 LOGO_GAME_OVER = "assets/images/logo_game_over.png"
 
 #Sprites
 SPRITE_JULIA = "assets/sprites/yulia_sprite.png"
-# SPRITE_KNIFE = "assets/sprites/knife.png"
+SPRITE_KNIFE = "assets/sprites/starfish_sprite.png"
 # SPRITE_POWERUP = "assets/sprites/powerup.png"
 
 #Musica

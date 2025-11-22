@@ -563,7 +563,7 @@ class Knife:
         
         # === CARGA DE SPRITE PARA CUCHILLO ===
         # Intentar cargar sprite del cuchillo
-        sprite_path = os.path.join("assets", "sprites", "knife__pixelart.jpg")
+        sprite_path = os.path.join(SPRITE_KNIFE)
         self.sprite, self.using_fallback = load_sprite_with_fallback(
             sprite_path, 
             KNIFE_COLOR,  # Color fallback

@@ -494,39 +494,30 @@ class JuliasRunGame:
         pygame.display.flip()
     
     def draw_game_content(self, surface):
-        """
-        ✅ IMPLEMENTADO: Dibuja el contenido del juego en la superficie especificada.
-        
-        Esta función centraliza el dibujo del juego para poder reutilizarla
-        en diferentes contextos (juego normal, pausa con fondo, etc.).
-        """
-                
-        surface.blit(self.playing_state.background_image, (0, 0))
-        
-        # Dibujar todas las entidades
-        self.player.draw(surface)
-        
-        for obstacle in self.obstacles:
-            obstacle.draw(surface)
-        
+        # Dibuja el fondo desde PlayingState (scroll dinámico)
+        self.playing_state.draw(
+            surface,
+            self.player,
+            self.obstacles,
+            self.knives,
+            self.powerups,
+            self.powerup_effects,
+            self.knife_cooldown
+        )
+
+        # Ahora dibuja solo las entidades adicionales
         for enemy in self.enemies:
             enemy.draw(surface)
-        
-        for knife in self.knives:
-            knife.draw(surface)
-        
-        for powerup in self.powerups:
-            powerup.draw(surface)
-        
-        # ✅ IMPLEMENTADO: Dibujar efectos visuales
+
         for explosion in self.explosions:
             explosion.draw(surface)
-        
+
         for particle_effect in self.particles:
             particle_effect.draw(surface)
-        
-        # Dibujar HUD (Heads-Up Display)
+
+        # HUD del main (porque el PlayingState solo tiene HUD antiguo)
         self.draw_hud(surface)
+
     
     def draw_hud(self, surface):
         """

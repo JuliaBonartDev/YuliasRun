@@ -328,6 +328,9 @@ class PlayingState:
             self.background_image,
             (WINDOW_WIDTH, WINDOW_HEIGHT)
         )
+
+        self.bg_y = 0   # posición vertical del fondo
+        self.bg_speed = 2  # píxeles por frame (ajusta a tu gusto)
               
             
     def handle_events(self, events, player, knife_cooldown):
@@ -461,7 +464,13 @@ class PlayingState:
             knife_cooldown: Timer de cooldown
         """
         
-        screen.blit(self.background_image, (0, 0))
+        # --- Fondo con scroll infinito ---
+        self.bg_y += self.bg_speed
+        if self.bg_y >= WINDOW_HEIGHT:
+            self.bg_y = 0
+
+        screen.blit(self.background_image, (0, self.bg_y))
+        screen.blit(self.background_image, (0, self.bg_y - WINDOW_HEIGHT))
 
         
         # Dibujar todas las entidades
