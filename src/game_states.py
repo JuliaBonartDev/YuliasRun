@@ -153,6 +153,20 @@ class MenuState:
        
         self.title_image = pygame.transform.scale(self.title_image, (210, 220))
 
+        # ======================
+        # IMAGEN DEBAJO DE LAS INSTRUCCIONES
+        # ======================
+        bottom_image_path = os.path.join(image_base_path, IMG_PULPO_MENU)
+        bottom_image_path = os.path.abspath(bottom_image_path)
+
+        try:
+            self.bottom_image_original = pygame.image.load(bottom_image_path).convert_alpha()
+        except:
+            print("Error al cargar la imagen inferior del menú")
+            self.bottom_image_original = pygame.Surface((200, 200))
+            self.bottom_image_original.fill((255, 0, 255))  # color placeholder
+
+
     def on_enter(self):
         music_base_path = os.path.dirname(os.path.dirname(__file__))
         music_path = os.path.join(music_base_path, MUSIC_MENU)
@@ -165,23 +179,7 @@ class MenuState:
         except Exception as e:
             print("Error al reproducir música de menú:", e)
 
-
-        # # ======================
-        # # CARGAR MÚSICA DEL MENÚ
-        # # ======================
-        # music_base_path = os.path.dirname(os.path.dirname(__file__))
-
-        # music_path = os.path.join(music_base_path, MUSIC_MENU)
-        # music_path = os.path.abspath(music_path)
-
-        # try:
-        #     pygame.mixer.init()  # Inicializar motor de sonido
-        #     pygame.mixer.music.load(music_path)
-        #     pygame.mixer.music.set_volume(0.5)   # volumen entre 0 y 1
-        #     pygame.mixer.music.play(-1)          # -1 = loop infinito
-        # except Exception as e:
-        #     print("Error al cargar música del menú:", e)
-    
+           
     def handle_events(self, events):
         """
         Maneja los eventos del menú.
@@ -302,7 +300,10 @@ class MenuState:
             "Recoge power-ups de colores",
             "",
             "Presiona ESPACIO para comenzar",
-            "ESC para salir"
+            "ESC para salir",
+            "",
+            "(Vocal performance by",
+            "the game's developer)"
         ]
         
         start_y = 280
@@ -311,6 +312,30 @@ class MenuState:
             text = self.state_manager.font_medium.render(instruction, True, color)
             text_rect = text.get_rect(center=(WINDOW_WIDTH//2 + OFFSET_X, start_y + i * 25))
             screen.blit(text, text_rect)
+            
+        # ======================
+        # DIBUJAR LA IMAGEN DEBAJO DEL TEXTO
+        # ======================
+       
+        TARGET_WIDTH = 180
+        TARGET_HEIGHT = 180
+
+        # Escalar la imagen
+        bottom_image_scaled = pygame.transform.scale(
+            self.bottom_image_original,
+            (TARGET_WIDTH, TARGET_HEIGHT)
+        )
+
+        # Posición debajo del texto
+        img_x = WINDOW_WIDTH//2 + OFFSET_X
+        img_y = start_y + len(instructions) * 25 + 100  # un poco más abajo
+
+        # Centrar la imagen en X
+        img_rect = bottom_image_scaled.get_rect(center=(img_x, img_y))
+
+        # Dibujarla en pantalla
+        screen.blit(bottom_image_scaled, img_rect)
+
         
         # TODO 9: Añadir demo visual o animación de fondo
         # self.draw_background_animation(screen)

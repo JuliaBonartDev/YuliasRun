@@ -154,6 +154,7 @@ PAUSE_VIDEO = "assets/animaciones/video_pause.mp4"
 
 #Imagenes
 IMG_MENU_DERECHO = "assets/images/fondo-menu.png"
+IMG_PULPO_MENU = "assets/images/img_pulpo_menu.png"
 IMG_MAIN = "assets/images/main_yuls_2.png"
 LOGO_MENU = "assets/images/logo.png"
 LOGO_GAME_OVER = "assets/images/logo_game_over.png"
