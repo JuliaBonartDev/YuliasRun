@@ -669,7 +669,7 @@ class PowerUp:
             self.symbol = "T"
             # Para el té, usar el mismo sprite de vodka como placeholder
             # (en un juego real tendrías un sprite específico para cada power-up)
-            sprite_path = os.path.join("assets", "sprites", "vodka_pixelart.jpg")
+            sprite_path = os.path.join(OCTOPUS_POWERUP)
         
         # Cargar sprite del power-up
         self.sprite, self.using_fallback = load_sprite_with_fallback(
@@ -801,8 +801,10 @@ class Enemy(Obstacle):
         """
         super().__init__(difficulty_multiplier)  # Llamar al constructor padre
         
-        # Configuración específica del enemigo
-        self.color = (150, 0, 150)  # Color púrpura para distinguir
+        # Imagen del enemigo
+        self.original_image = pygame.image.load(SPRITE_SHARK).convert_alpha()
+        self.image = pygame.transform.scale(self.original_image, (self.rect.width, self.rect.height))
+
         self.obstacle_type = 'enemy'
         self.target_x = player_x    # Posición objetivo (jugador)
         self.horizontal_speed = 1   # Velocidad de seguimiento horizontal
@@ -829,32 +831,34 @@ class Enemy(Obstacle):
         self.rect.right = min(WINDOW_WIDTH, self.rect.right)
         
         # Efectos visuales
-        self.rotation += 3  # Rotar más rápido que obstáculos normales
+        # self.rotation += 3  # Rotar más rápido que obstáculos normales
         self.pulse_timer += 1
         
         return self.rect.top < WINDOW_HEIGHT
     
     def draw(self, screen):
-        """Dibujar enemigo con indicadores especiales."""
-        # Color base con pulso
-        base_color = self.color
-        pulse_offset = int(abs(pygame.math.Vector2(1, 0).rotate(self.pulse_timer * 4).x) * 30)
-        pulse_color = tuple(min(255, max(0, c + pulse_offset)) for c in base_color)
+        # Dibujar la imagen del enemigo directamente
+        screen.blit(self.image, self.rect.topleft)
+        # """Dibujar enemigo con indicadores especiales."""
+        # # Color base con pulso
+        # base_color = self.color
+        # pulse_offset = int(abs(pygame.math.Vector2(1, 0).rotate(self.pulse_timer * 4).x) * 30)
+        # pulse_color = tuple(min(255, max(0, c + pulse_offset)) for c in base_color)
         
-        # Dibujar enemigo
-        pygame.draw.rect(screen, pulse_color, self.rect)
+        # # Dibujar enemigo
+        # pygame.draw.rect(screen, pulse_color, self.rect)
         
-        # Indicador de que es un enemigo (ojos)
-        eye_size = 3
-        left_eye = (self.rect.left + 6, self.rect.top + 6)
-        right_eye = (self.rect.right - 6, self.rect.top + 6)
-        pygame.draw.circle(screen, WHITE, left_eye, eye_size)
-        pygame.draw.circle(screen, WHITE, right_eye, eye_size)
-        pygame.draw.circle(screen, RED, left_eye, 1)
-        pygame.draw.circle(screen, RED, right_eye, 1)
+        # # Indicador de que es un enemigo (ojos)
+        # eye_size = 3
+        # left_eye = (self.rect.left + 6, self.rect.top + 6)
+        # right_eye = (self.rect.right - 6, self.rect.top + 6)
+        # pygame.draw.circle(screen, WHITE, left_eye, eye_size)
+        # pygame.draw.circle(screen, WHITE, right_eye, eye_size)
+        # pygame.draw.circle(screen, RED, left_eye, 1)
+        # pygame.draw.circle(screen, RED, right_eye, 1)
         
-        # Borde amenazante
-        pygame.draw.rect(screen, RED, self.rect, 2)
+        # # Borde amenazante
+        # pygame.draw.rect(screen, RED, self.rect, 2)
 
 
 # ✅ IMPLEMENTADO: Clase Explosion para efectos visuales

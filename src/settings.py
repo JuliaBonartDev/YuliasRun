@@ -77,14 +77,14 @@ OBSTACLE_COLOR = RED   # Color del obstáculo
 OBSTACLE_SPAWN_RATE = 60  # Frames entre spawn de obstáculos (1 segundo a 60 FPS)
 
 # === CONFIGURACIÓN DE POWER-UPS ===
-POWERUP_WIDTH = 25     # Ancho del power-up
-POWERUP_HEIGHT = 25    # Alto del power-up
+POWERUP_WIDTH = 30     # Ancho del power-up
+POWERUP_HEIGHT = 30    # Alto del power-up
 POWERUP_SPEED = 2      # Velocidad de caída (más lento que obstáculos)
 POWERUP_SPAWN_RATE = 300  # Frames entre spawn de power-ups (5 segundos a 60 FPS)
 
 # Colores de power-ups
 VODKA_COLOR = PURPLE   # Vodka Boost - color morado
-TEA_COLOR = GREEN      # Té Mágico - color verde
+TEA_COLOR = WHITE      # Té Mágico - color verde
 
 # Duración de efectos (en frames)
 VODKA_DURATION = 180   # 3 segundos a 60 FPS
@@ -164,6 +164,8 @@ SPRITE_KNIFE = "assets/sprites/starfish_sprite.png"
 SPRITE_JELLYFISH = "assets/sprites/jellyfish_sprite2.png"
 SPRITE_URCHIN = "assets/sprites/urchin_sprite.png"
 SPRITE_CRAB = "assets/sprites/crab_sprite.png"
+SPRITE_SHARK = "assets/sprites/sprite_shark2.png"
+OCTOPUS_POWERUP = "assets/sprites/sprite_pulpo_powerup.png"
 # SPRITE_POWERUP = "assets/sprites/powerup.png"
 
 #Musica
