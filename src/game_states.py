@@ -329,17 +329,11 @@ class PlayingState:
     
     def __init__(self, state_manager):
         """Constructor del estado de juego."""
-        self.state_manager = state_manager    
+        self.state_manager = state_manager 
 
-        # # Música de fondo
-        # base_path = os.path.dirname(os.path.dirname(__file__))
-        # music_path = os.path.join(base_path, MUSIC_MAIN)
-        # music_path = os.path.abspath(music_path)
-
-        # pygame.mixer.music.load(music_path)
-        # pygame.mixer.music.set_volume(0.5)   # volumen entre 0.0 y 1.0
-        # pygame.mixer.music.play(-1)          # -1 = loop infinito
-
+        self.music_started = False
+  
+        
         #Sonidos
         self.snd_powerup = pygame.mixer.Sound(SOUND_POWERUP)
         self.snd_escudo = pygame.mixer.Sound(SOUND_ESCUDO)
@@ -369,9 +363,14 @@ class PlayingState:
         music_path = os.path.join(base_path, MUSIC_MAIN)
         music_path = os.path.abspath(music_path)
 
-        pygame.mixer.music.load(music_path)
-        pygame.mixer.music.set_volume(0.5)
-        pygame.mixer.music.play(-1)
+        if not self.music_started:
+            pygame.mixer.music.load(music_path)
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play(-1)
+            self.music_started = True
+        else:
+            pygame.mixer.music.unpause()
+
           
             
     def handle_events(self, events, player, knife_cooldown):
@@ -600,6 +599,14 @@ class GameOverState:
         self.logo_image = pygame.transform.scale(self.logo_image, (300, 300))
 
         self.state_manager = state_manager
+
+        # --- Sonido de Game Over ---
+        sound_path = os.path.join(base_path, SOUND_GAME_OVER)
+        sound_path = os.path.abspath(sound_path)
+        self.game_over_sound = pygame.mixer.Sound(sound_path)
+        self.game_over_sound.set_volume(0.8)  # opcional
+        self.sound_played = False
+
     
     def set_scores(self, final_score, best_score):
         """
@@ -612,6 +619,11 @@ class GameOverState:
         self.final_score = final_score
         self.best_score = best_score
         self.is_new_record = final_score > best_score
+
+        # Reproducir sonido solo una vez
+        if not self.sound_played:
+            self.game_over_sound.play()
+            self.sound_played = True
     
     def handle_events(self, events):
         """
@@ -624,8 +636,10 @@ class GameOverState:
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == KEY_ENTER:
+                    self.sound_played = False   # <-- reset
                     self.state_manager.change_state(STATE_PLAYING)
                 elif event.key == KEY_ESCAPE:
+                    self.sound_played = False   # <-- reset
                     return False  # Salir del juego
         
         return True

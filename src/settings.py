@@ -177,6 +177,7 @@ SOUND_THROW = "assets/sounds/sound_throw.wav"
 # SOUND_HIT = "assets/sounds/hit.wav"
 SOUND_POWERUP = "assets/sounds/sound_powerup.wav"
 SOUND_ESCUDO = "assets/sounds/sound_escudo.wav"
+SOUND_GAME_OVER = "assets/sounds/game-over.ogg"
 
 # === NOTAS EDUCATIVAS ===
 """
